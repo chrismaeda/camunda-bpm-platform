@@ -314,6 +314,7 @@ import org.camunda.bpm.engine.impl.persistence.entity.TaskReportManager;
 import org.camunda.bpm.engine.impl.persistence.entity.TenantManager;
 import org.camunda.bpm.engine.impl.persistence.entity.UserOperationLogManager;
 import org.camunda.bpm.engine.impl.persistence.entity.VariableInstanceManager;
+import org.camunda.bpm.engine.impl.repository.DefaultDeploymentHandler;
 import org.camunda.bpm.engine.impl.runtime.ConditionHandler;
 import org.camunda.bpm.engine.impl.runtime.CorrelationHandler;
 import org.camunda.bpm.engine.impl.runtime.DefaultConditionHandler;
@@ -350,6 +351,7 @@ import org.camunda.bpm.engine.impl.variable.serializer.jpa.EntityManagerSessionF
 import org.camunda.bpm.engine.impl.variable.serializer.jpa.JPAVariableSerializer;
 import org.camunda.bpm.engine.management.Metrics;
 import org.camunda.bpm.engine.repository.DeploymentBuilder;
+import org.camunda.bpm.engine.repository.DeploymentHandler;
 import org.camunda.bpm.engine.runtime.Incident;
 import org.camunda.bpm.engine.test.mock.MocksResolverFactory;
 import org.camunda.bpm.engine.variable.Variables;
@@ -599,6 +601,8 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   protected ConditionHandler conditionHandler;
 
+  protected DeploymentHandler deploymentHandler;
+
   /**
    * session factory to be used for obtaining identity provider sessions
    */
@@ -843,6 +847,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     initProcessApplicationManager();
     initCorrelationHandler();
     initConditionHandler();
+    initDeploymentHandler();
     initIncidentHandlers();
     initPasswordDigest();
     initDeploymentRegistration();
@@ -2306,6 +2311,13 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     }
   }
 
+  // deployment handler
+  protected void initDeploymentHandler() {
+    if (deploymentHandler == null) {
+      deploymentHandler = new DefaultDeploymentHandler();
+    }
+  }
+
   // history handlers /////////////////////////////////////////////////////
 
   protected void initHistoryEventProducer() {
@@ -3309,6 +3321,14 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   public void setConditionHandler(ConditionHandler conditionHandler) {
     this.conditionHandler = conditionHandler;
+  }
+
+  public DeploymentHandler getDeploymentHandler() {
+    return deploymentHandler;
+  }
+
+  public void setDeploymentHandler(DeploymentHandler deploymentHandler) {
+    this.deploymentHandler = deploymentHandler;
   }
 
   public ProcessEngineConfigurationImpl setHistoryEventHandler(HistoryEventHandler historyEventHandler) {

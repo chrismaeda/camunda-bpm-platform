@@ -35,7 +35,6 @@ import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.exception.NotFoundException;
 import org.camunda.bpm.engine.exception.NotValidException;
 import org.camunda.bpm.engine.history.UserOperationLogEntry;
-import org.camunda.bpm.engine.impl.DeploymentQueryImpl;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
 import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.camunda.bpm.engine.impl.cfg.CommandChecker;
@@ -133,6 +132,7 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
       public DeploymentWithDefinitions call() throws Exception {
         acquireExclusiveLock(commandContext);
         DeploymentEntity deployment = initDeployment();
+        Collection<ResourceEntity> containedResources = deployment.getResources().values();
         Map<String, ResourceEntity> resourcesToDeploy = resolveResourcesToDeploy(commandContext, deployment);
 
         if (!resourcesToDeploy.isEmpty()) {
@@ -149,7 +149,7 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
         if(deploymentBuilder instanceof ProcessApplicationDeploymentBuilder) {
           // for process application deployments, job executor registration is managed by
           // process application manager
-          ProcessApplicationRegistration registration = registerProcessApplication(commandContext, deployment);
+          ProcessApplicationRegistration registration = registerProcessApplication(commandContext, deployment, containedResources);
           return new ProcessApplicationDeploymentImpl(deployment, registration);
         } else {
           registerWithJobExecutor(commandContext, deployment);
@@ -506,7 +506,7 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
     }
   }
 
-  protected ProcessApplicationRegistration registerProcessApplication(CommandContext commandContext, DeploymentEntity deployment) {
+  protected ProcessApplicationRegistration registerProcessApplication(CommandContext commandContext, DeploymentEntity deployment, Collection<ResourceEntity> containedResources) {
     ProcessApplicationDeploymentBuilderImpl appDeploymentBuilder = (ProcessApplicationDeploymentBuilderImpl) deploymentBuilder;
     final ProcessApplicationReference appReference = appDeploymentBuilder.getProcessApplicationReference();
 
@@ -515,7 +515,7 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
 
     if (appDeploymentBuilder.isResumePreviousVersions()) {
       List<ProcessDefinition> definitionResources
-          = retrieveProcessDefinitionsFromResources(commandContext, deployment.getResources());
+          = retrieveProcessDefinitionsFromResources(commandContext, containedResources);
       String resumePreviousBy = appDeploymentBuilder.getResumePreviousVersionsBy();
 
       deploymentsToRegister.addAll(deploymentHandler
@@ -527,10 +527,10 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
 
   }
 
-  protected List<ProcessDefinition> retrieveProcessDefinitionsFromResources(CommandContext commandContext, Map<String, ResourceEntity> resources) {
+  protected List<ProcessDefinition> retrieveProcessDefinitionsFromResources(CommandContext commandContext, Collection<ResourceEntity> resources) {
     Set<String> processDefinitionKeys = new HashSet<String>();
 
-    for (ResourceEntity resource : resources.values()) {
+    for (ResourceEntity resource : resources) {
       if (isBpmnResource(resource)) {
 
         ByteArrayInputStream byteStream = new ByteArrayInputStream(resource.getBytes());
