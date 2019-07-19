@@ -514,14 +514,25 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
     Set<String> deploymentsToRegister = new HashSet<String>(Collections.singleton(deployment.getId()));
 
     if (appDeploymentBuilder.isResumePreviousVersions()) {
+
       List<ProcessDefinition> definitionResources
           = retrieveProcessDefinitionsFromResources(commandContext, containedResources);
       String resumePreviousBy = appDeploymentBuilder.getResumePreviousVersionsBy();
       RepositoryService repositoryService = commandContext.getProcessEngineConfiguration()
         .getRepositoryService();
 
-      deploymentsToRegister.addAll(deploymentHandler
-        .determineDeploymentsToResume(repositoryService, deployment, definitionResources, resumePreviousBy));
+      switch (resumePreviousBy) {
+        case ResumePreviousBy.RESUME_BY_DEPLOYMENT_NAME:
+          deploymentsToRegister.addAll(deploymentHandler
+            .determineDeploymentsToResumeByDeploymentName(repositoryService, deployment));
+          break;
+        case ResumePreviousBy.RESUME_BY_PROCESS_DEFINITION_KEY:
+        default:
+          deploymentsToRegister.addAll(deploymentHandler
+            .determineDeploymentsToResumeByProcessDefinition(definitionResources));
+          break;
+      }
+
     }
 
     // register process application for deployments

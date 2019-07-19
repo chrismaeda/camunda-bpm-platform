@@ -17,13 +17,11 @@
 package org.camunda.bpm.engine.impl.repository;
 
 import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.persistence.entity.ResourceEntity;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.DeploymentHandler;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.repository.Resource;
-import org.camunda.bpm.engine.repository.ResumePreviousBy;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,31 +46,27 @@ public class DefaultDeploymentHandler implements DeploymentHandler {
   }
 
   @Override
-  public Collection<String> determineDeploymentsToResume(RepositoryService repositoryService,
-    Deployment baseDeployment,
-    List<ProcessDefinition> processDefinitions,
-    String resumePreviousBy) {
+  public Collection<String> determineDeploymentsToResumeByDeploymentName(
+    RepositoryService repositoryService,
+    Deployment baseDeployment) {
+
+    List<Deployment> previousDeployments = repositoryService
+      .createDeploymentQuery()
+      .deploymentName(baseDeployment.getName())
+      .list();
 
     Set<String> deploymentIds = new HashSet<String>();
-    switch (resumePreviousBy) {
-
-      case ResumePreviousBy.RESUME_BY_DEPLOYMENT_NAME:
-        List<Deployment> previousDeployments = repositoryService
-          .createDeploymentQuery()
-          .deploymentName(baseDeployment.getName())
-          .list();
-
-        for (Deployment deployment : previousDeployments) {
-          deploymentIds.add(deployment.getId());
-        }
-        return deploymentIds;
-
-      case ResumePreviousBy.RESUME_BY_PROCESS_DEFINITION_KEY:
-      default:
-        for (ProcessDefinition processDefinition : processDefinitions) {
-          deploymentIds.add(processDefinition.getDeploymentId());
-        }
-        return deploymentIds;
+    for (Deployment deployment : previousDeployments) {
+      deploymentIds.add(deployment.getId());
     }
+    return deploymentIds;
+  }
+
+  @Override public Collection<String> determineDeploymentsToResumeByProcessDefinition(List<ProcessDefinition> processDefinitions) {
+    Set<String> deploymentIds = new HashSet<String>();
+    for (ProcessDefinition processDefinition : processDefinitions) {
+      deploymentIds.add(processDefinition.getDeploymentId());
+    }
+    return deploymentIds;
   }
 }

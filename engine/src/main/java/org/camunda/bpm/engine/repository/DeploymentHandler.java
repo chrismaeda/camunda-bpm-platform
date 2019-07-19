@@ -34,12 +34,16 @@ public interface DeploymentHandler {
   /**
    * @param baseDeployment the new deployment, or, if no new resources are being deployed,
    *   the most recent deployment of the same name
-   * @param processDefinitions the deployment Process Definitions for which to check if
-   *   previous deployments need to be resumed.
-   * @param resumePreviousBy the type of resuming previous deployment behavior.
-   *   See {@link ResumePreviousBy} for the possible values.
    * @return the IDs of deployments that should be resumed (registered with the job executor
    *   and registered for the deploying process application)
    */
-  Collection<String> determineDeploymentsToResume(RepositoryService repositoryService, Deployment baseDeployment, List<ProcessDefinition> processDefinitions, String resumePreviousBy);
+  Collection<String> determineDeploymentsToResumeByDeploymentName(RepositoryService repositoryService, Deployment baseDeployment);
+
+  /**
+   * @param processDefinitions the deployment Process Definitions for which to check if
+   *   previous deployments need to be resumed.
+   * @return the IDs of deployments that should be resumed (registered with the job executor
+   *   and registered for the deploying process application)
+   */
+  Collection<String> determineDeploymentsToResumeByProcessDefinition(List<ProcessDefinition> processDefinitions);
 }

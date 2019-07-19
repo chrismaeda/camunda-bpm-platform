@@ -24,7 +24,6 @@ import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.DeploymentHandler;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.repository.Resource;
-import org.camunda.bpm.engine.repository.ResumePreviousBy;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
@@ -71,23 +70,23 @@ public class CustomDeploymentHandler implements DeploymentHandler {
   }
 
   @Override
-  public Collection<String> determineDeploymentsToResume(RepositoryService repositoryService,
-    Deployment baseDeployment,
-    List<ProcessDefinition> processDefinitions,
-    String resumePreviousBy) {
+  public Collection<String> determineDeploymentsToResumeByDeploymentName(
+      RepositoryService repositoryService,
+      Deployment baseDeployment) {
 
-    if (ResumePreviousBy.RESUME_BY_DEPLOYMENT_NAME.equals(resumePreviousBy)){
-      throw new ProcessEngineException("RESUME_BY_DEPLOYMENT_NAME is not supported with this Deployment Handler!");
-    } else {
-      Set<String> deploymentIds = new HashSet<>();
-      for (ProcessDefinition processDefinition : processDefinitions) {
-        if (Integer.valueOf(processDefinition.getVersionTag()) > currentVersionTag) {
-          deploymentIds.add(processDefinition.getDeploymentId());
-        }
+    throw new ProcessEngineException("RESUME_BY_DEPLOYMENT_NAME is not supported with this Deployment Handler!");
+  }
+
+  @Override
+  public Collection<String> determineDeploymentsToResumeByProcessDefinition(List<ProcessDefinition> processDefinitions) {
+    Set<String> deploymentIds = new HashSet<>();
+    for (ProcessDefinition processDefinition : processDefinitions) {
+      if (Integer.valueOf(processDefinition.getVersionTag()) > currentVersionTag) {
+        deploymentIds.add(processDefinition.getDeploymentId());
       }
-
-      return deploymentIds;
     }
+
+    return deploymentIds;
   }
 
   protected boolean isBpmnResource(Resource resource) {
