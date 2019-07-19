@@ -17,6 +17,7 @@
 package org.camunda.bpm.engine.test.bpmn.deployment;
 
 import org.camunda.bpm.engine.ProcessEngineException;
+import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnDeployer;
 import org.camunda.bpm.engine.impl.util.StringUtil;
 import org.camunda.bpm.engine.repository.Deployment;
@@ -70,7 +71,9 @@ public class CustomDeploymentHandler implements DeploymentHandler {
   }
 
   @Override
-  public Collection<String> determineDeploymentsToResume(Deployment baseDeployment, List<ProcessDefinition> processDefinitions,
+  public Collection<String> determineDeploymentsToResume(RepositoryService repositoryService,
+    Deployment baseDeployment,
+    List<ProcessDefinition> processDefinitions,
     String resumePreviousBy) {
 
     if (ResumePreviousBy.RESUME_BY_DEPLOYMENT_NAME.equals(resumePreviousBy)){

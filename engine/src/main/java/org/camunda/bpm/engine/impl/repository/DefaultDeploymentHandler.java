@@ -16,6 +16,7 @@
  */
 package org.camunda.bpm.engine.impl.repository;
 
+import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.persistence.entity.ResourceEntity;
 import org.camunda.bpm.engine.repository.Deployment;
@@ -47,17 +48,16 @@ public class DefaultDeploymentHandler implements DeploymentHandler {
   }
 
   @Override
-  public Collection<String> determineDeploymentsToResume(Deployment baseDeployment,
+  public Collection<String> determineDeploymentsToResume(RepositoryService repositoryService,
+    Deployment baseDeployment,
     List<ProcessDefinition> processDefinitions,
-      String resumePreviousBy) {
+    String resumePreviousBy) {
 
     Set<String> deploymentIds = new HashSet<String>();
     switch (resumePreviousBy) {
 
       case ResumePreviousBy.RESUME_BY_DEPLOYMENT_NAME:
-        List<Deployment> previousDeployments = Context.getCommandContext()
-          .getProcessEngineConfiguration()
-          .getRepositoryService()
+        List<Deployment> previousDeployments = repositoryService
           .createDeploymentQuery()
           .deploymentName(baseDeployment.getName())
           .list();

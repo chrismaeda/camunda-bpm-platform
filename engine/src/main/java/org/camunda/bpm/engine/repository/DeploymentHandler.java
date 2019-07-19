@@ -16,6 +16,8 @@
  */
 package org.camunda.bpm.engine.repository;
 
+import org.camunda.bpm.engine.RepositoryService;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -39,5 +41,5 @@ public interface DeploymentHandler {
    * @return the IDs of deployments that should be resumed (registered with the job executor
    *   and registered for the deploying process application)
    */
-  Collection<String> determineDeploymentsToResume(Deployment baseDeployment, List<ProcessDefinition> processDefinitions, String resumePreviousBy);
+  Collection<String> determineDeploymentsToResume(RepositoryService repositoryService, Deployment baseDeployment, List<ProcessDefinition> processDefinitions, String resumePreviousBy);
 }

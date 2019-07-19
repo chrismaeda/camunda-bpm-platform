@@ -517,9 +517,11 @@ public class DeployCmd implements Command<DeploymentWithDefinitions>, Serializab
       List<ProcessDefinition> definitionResources
           = retrieveProcessDefinitionsFromResources(commandContext, containedResources);
       String resumePreviousBy = appDeploymentBuilder.getResumePreviousVersionsBy();
+      RepositoryService repositoryService = commandContext.getProcessEngineConfiguration()
+        .getRepositoryService();
 
       deploymentsToRegister.addAll(deploymentHandler
-        .determineDeploymentsToResume(deployment, definitionResources, resumePreviousBy));
+        .determineDeploymentsToResume(repositoryService, deployment, definitionResources, resumePreviousBy));
     }
 
     // register process application for deployments
