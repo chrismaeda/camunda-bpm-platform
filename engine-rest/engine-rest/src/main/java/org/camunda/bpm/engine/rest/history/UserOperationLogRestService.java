@@ -18,9 +18,12 @@ package org.camunda.bpm.engine.rest.history;
 
 import org.camunda.bpm.engine.rest.dto.CountResultDto;
 import org.camunda.bpm.engine.rest.dto.history.UserOperationLogEntryDto;
+import org.camunda.bpm.engine.rest.dto.AnnotationDto;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -48,4 +51,15 @@ public interface UserOperationLogRestService {
   List<UserOperationLogEntryDto> queryUserOperationEntries(@Context UriInfo uriInfo,
                                                            @QueryParam("firstResult") Integer firstResult,
                                                            @QueryParam("maxResults") Integer maxResults);
+
+  @PUT
+  @Path("/{operationId}/set-annotation")
+  @Produces(MediaType.APPLICATION_JSON)
+  void setAnnotation(@PathParam("operationId") String operationId, AnnotationDto annotationDto);
+
+  @PUT
+  @Path("/{operationId}/clear-annotation")
+  @Produces(MediaType.APPLICATION_JSON)
+  void clearAnnotation(@PathParam("operationId") String operationId);
+
 }
