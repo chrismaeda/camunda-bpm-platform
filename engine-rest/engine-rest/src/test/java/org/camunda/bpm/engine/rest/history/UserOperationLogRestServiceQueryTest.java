@@ -80,6 +80,8 @@ public class UserOperationLogRestServiceQueryTest extends AbstractRestServiceTes
 
   protected UserOperationLogQuery queryMock;
 
+  protected HistoryService historyService;
+
   @Before
   public void setUpMock() {
     List<UserOperationLogEntry> entries = MockProvider.createUserOperationLogEntries();
@@ -87,7 +89,10 @@ public class UserOperationLogRestServiceQueryTest extends AbstractRestServiceTes
     when(queryMock.list()).thenReturn(entries);
     when(queryMock.listPage(anyInt(), anyInt())).thenReturn(entries);
     when(queryMock.count()).thenReturn((long) entries.size());
-    when(processEngine.getHistoryService().createUserOperationLogQuery()).thenReturn(queryMock);
+
+    historyService = mock(HistoryService.class);
+    when(processEngine.getHistoryService()).thenReturn(historyService);
+    when(historyService.createUserOperationLogQuery()).thenReturn(queryMock);
   }
 
   @Test
@@ -294,14 +299,12 @@ public class UserOperationLogRestServiceQueryTest extends AbstractRestServiceTes
         .when()
           .put(USER_OPERATION_LOG_SET_ANNOTATION_RESOURCE_URL);
 
-    verify(processEngine.getHistoryService())
+    verify(historyService)
         .setAnnotationForOperationLogById(EXAMPLE_USER_OPERATION_LOG_ID, EXAMPLE_USER_OPERATION_ANNOTATION);
   }
 
   @Test
   public void shouldThrowExceptionWhenSetAnnotation() {
-    HistoryService historyService = processEngine.getHistoryService();
-
     doThrow(NotValidException.class)
         .when(historyService)
         .setAnnotationForOperationLogById(anyString(), anyString());
@@ -325,14 +328,12 @@ public class UserOperationLogRestServiceQueryTest extends AbstractRestServiceTes
         .when()
           .put(USER_OPERATION_LOG_CLEAR_ANNOTATION_RESOURCE_URL);
 
-    verify(processEngine.getHistoryService())
+    verify(historyService)
         .clearAnnotationForOperationLogById(EXAMPLE_USER_OPERATION_LOG_ID);
   }
 
   @Test
   public void shouldThrowExceptionWhenClearAnnotation() {
-    HistoryService historyService = processEngine.getHistoryService();
-
     doThrow(BadUserRequestException.class)
         .when(historyService)
         .clearAnnotationForOperationLogById(anyString());
